@@ -1,0 +1,56 @@
+.form-control {
+    padding: 10px 21px;
+    height: 50px;
+    border-radius: 20px;
+}
+.flex-direction-column{
+    flex-direction: column;
+}
+.modal-footer{
+    background-color: #ffd487;
+}
+.modal-header{
+    background-color: orange;
+}
+header{
+    background: orange;
+    padding: 20px;
+}
+.nav-tabs .nav-link{
+color: red !important;
+
+}
+.btn-primary{
+    background: red;
+    border: none;
+}
+.main-content {
+    margin-top: 20px;
+}
+.post {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+.post:hover {
+    background-color: #f9f9f9;
+}
+.top-creators {
+    background-color: #f7f7f7;
+    padding: 15px;
+    border-radius: 5px;
+}
+.top-creators h5 {
+    margin-bottom: 15px;
+}
+.feedback-button {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+}
+.creator-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 10px;
+}

@@ -2,6 +2,11 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PostController;
+use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Api\CommentController;
+use App\Http\Controllers\Auth\RegisterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +19,16 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+
+Route::post('register', [RegisterController::class, 'register']);
+Route::post('login', [LoginController::class, 'login']);
+Route::post('logout', [LoginController::class, 'logout'])->middleware('auth:sanctum');
+
+Route::middleware('auth: sanctum')->group(function () {
+
+    Route::apiResource('posts', PostController::class);
+    Route::apiResource('comments', CommentController::class);
+    Route::get('users/{user}', [UserController::class, 'show']);
 });
+Route::get('posts', [PostController::class, 'index']);
+Route::get('posts/{post}', [PostController::class, 'show']);

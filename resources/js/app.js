@@ -14,9 +14,19 @@
 
 import { createApp } from 'vue';
 import App from './components/App.vue';
+import '../css/style.css';
 
-createApp(App).mount('#app');
+import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
 
+// Create the Vue app instance
+const app = createApp(App);
+
+// Use VueSweetalert2 plugin
+app.use(VueSweetalert2);
+
+// Mount the app
+app.mount('#app');
 
 
 
