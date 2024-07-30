@@ -19,31 +19,65 @@
             </div>
         </header>
 
-        <!-- Main content -->
         <div class="container">
-            <router-view></router-view>
+            <div class="main-content row">
+                <div class="col-md-8">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="conversations-tab" data-toggle="tab" href="#conversations"
+                                role="tab" aria-controls="conversations" aria-selected="true">Conversations</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="help-others-tab" data-toggle="tab" href="#help-others" role="tab"
+                                aria-controls="help-others" aria-selected="false">Help others</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="categories-tab" data-toggle="tab" href="#categories" role="tab"
+                                aria-controls="categories" aria-selected="false">Categories</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade show active" id="conversations" role="tabpanel"
+                            aria-labelledby="conversations-tab">
+                            <PostList ref="postList" />
+                        </div>
+                        <div class="tab-pane fade" id="help-others" role="tabpanel" aria-labelledby="help-others-tab">
+                            <!-- Help others content -->
+                        </div>
+                        <div class="tab-pane fade" id="categories" role="tabpanel" aria-labelledby="categories-tab">
+                            <!-- Categories content -->
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <TopCreators />
+                </div>
+            </div>
         </div>
         <button class="btn btn-primary feedback-button">Feedback</button>
 
         <!-- Modals -->
         <login-modal @login-success="handleLoginSuccess" />
         <register-modal @register-success="handleRegisterSuccess" />
-        <post-modal />
-
+        <post-modal @post-created="refreshPosts" />
     </div>
 </template>
 
 <script>
 import axios from 'axios';
 import LoginModal from './Login.vue';
+import PostList from './PostList.vue';
 import RegisterModal from './Register.vue';
 import PostModal from './CreatePost.vue';
+import TopCreators from './TopCreators.vue';
 
 export default {
     components: {
         LoginModal,
         RegisterModal,
         PostModal,
+        PostList,
+        TopCreators
     },
     data() {
         return {
@@ -67,14 +101,15 @@ export default {
         },
         handleLoginSuccess() {
             this.isAuthenticated = true;
-            // Optionally, you can navigate to another page or show a success message
         },
         handleRegisterSuccess() {
             // You might want to log in the user automatically or show a success message
+        },
+        refreshPosts() {
+            this.$refs.postList.refreshPosts();
         }
     },
     mounted() {
-        // Check if the user is authenticated on component mount
         const token = localStorage.getItem('token');
         if (token) {
             this.isAuthenticated = true;

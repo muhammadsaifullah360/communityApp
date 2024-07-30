@@ -52,6 +52,7 @@ export default {
                 this.$emit('login-success');
                 this.$swal('Success', 'You have successfully logged in', 'success');
                 $('#loginModal').modal('hide');
+                $('.modal-backdrop').remove();
             } catch (error) {
                 this.$swal('Error', 'Invalid email or password', 'error');
             }

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class UserController extends Controller
 {
@@ -12,7 +13,6 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
     }
 
     /**
@@ -45,5 +45,20 @@ class UserController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+    public function getTopCreators()
+    {
+        // Example query to get top creators with post counts for the week
+        $weekCreators = User::withCount(['posts' => function ($query) {
+            $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+        }])->orderBy('posts_count', 'desc')->limit(10)->get();
+
+        // Example query to get top creators with post counts for all time
+        $allTimeCreators = User::withCount('posts')->orderBy('posts_count', 'desc')->limit(10)->get();
+
+        return response()->json([
+            'week' => $weekCreators,
+            'allTime' => $allTimeCreators
+        ]);
     }
 }

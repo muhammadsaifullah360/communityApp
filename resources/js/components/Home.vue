@@ -30,7 +30,7 @@
           </div>
         </div>
         <div class="col-md-4">
-          <TopCreators />
+          <!-- <TopCreators /> -->
         </div>
       </div>
     </div>
@@ -38,12 +38,12 @@
 
   <script>
   import PostList from './PostList.vue';
-  import TopCreators from './TopCreators.vue';
+//   import TopCreators from './TopCreators.vue';
 
   export default {
     components: {
       PostList,
-      TopCreators,
+    //   TopCreators,
     },
   };
   </script>

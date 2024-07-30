@@ -11,11 +11,14 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::all();
+        $perPage = 10; // Number of posts per page
+        $posts = Post::orderBy('created_at', 'desc')->paginate($perPage);
+
         return response()->json($posts, 200);
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -24,21 +27,15 @@ class PostController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'question' => 'required|string|max:255',
-            'description' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'content' => 'required|string',
         ]);
 
+
         $post = new Post();
+        $post->user_id = auth()->user()->id;
         $post->title = $request->title;
-        $post->question = $request->question;
-        $post->description = $request->description;
-
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('images', 'public');
-            $post->image = $imagePath;
-        }
-
+        $post->content = $request->content;
+        $post->view_count = 0;
         $post->save();
 
         return response()->json($post, 201);
@@ -49,7 +46,13 @@ class PostController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        return response()->json($post, 200);
     }
 
     /**
@@ -57,7 +60,22 @@ class PostController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+        ]);
+
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        $post->title = $request->title;
+        $post->content = $request->content;
+        $post->save();
+
+        return response()->json($post, 200);
     }
 
     /**
@@ -65,6 +83,14 @@ class PostController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $post = Post::find($id);
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        $post->delete();
+
+        return response()->json(['message' => 'Post deleted'], 200);
     }
 }
