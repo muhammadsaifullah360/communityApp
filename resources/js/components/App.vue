@@ -51,6 +51,8 @@
                 </div>
                 <div class="col-md-4">
                     <TopCreators />
+                    <CreatedPost />
+
                 </div>
             </div>
         </div>
@@ -70,6 +72,7 @@ import PostList from './PostList.vue';
 import RegisterModal from './Register.vue';
 import PostModal from './CreatePost.vue';
 import TopCreators from './TopCreators.vue';
+import CreatedPost from './CreatedPost.vue';
 
 export default {
     components: {
@@ -77,7 +80,8 @@ export default {
         RegisterModal,
         PostModal,
         PostList,
-        TopCreators
+        TopCreators,
+        CreatedPost,
     },
     data() {
         return {

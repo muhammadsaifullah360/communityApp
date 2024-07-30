@@ -3,9 +3,20 @@
         <div v-for="post in posts" :key="post.id" class="post">
             <p><strong>{{ post.title }}</strong></p>
             <p>{{ post.content }}</p>
-            <small>{{ formatDate(post.created_at) }}</small>
+            <div class="icons">
+                <span class="thumb-icon" @click="toggleThumb(post)">
+                    <i :class="{'checked': post.checked}">👍</i>
+                </span>
+                <span class="comment-icon" @click="toggleComment(post)">
+                    💬
+                </span>
+                <small>{{ formatDate(post.created_at) }}</small>
+            </div>
+            <div v-if="post.showComment" class="comment-area">
+                <textarea placeholder="Write a comment..."></textarea>
+            </div>
         </div>
-        <!-- <div v-if="loading" class="loading">Loading...</div> -->
+        <div v-if="loading" class="loading">Loading...</div>
     </div>
 </template>
 
@@ -42,6 +53,11 @@ export default {
                     this.finished = true;
                 } else {
                     this.posts = [...this.posts, ...response.data.data];
+                    // Initialize the new posts with checked and showComment properties
+                    this.posts.forEach(post => {
+                        if (!post.hasOwnProperty('checked')) post.checked = false;
+                        if (!post.hasOwnProperty('showComment')) post.showComment = false;
+                    });
                     this.page++;
                 }
             } catch (error) {
@@ -65,6 +81,12 @@ export default {
             const year = date.getFullYear();
 
             return `${hours}:${minutes} ${day}-${month}-${year}`;
+        },
+        toggleThumb(post) {
+            post.checked = !post.checked;
+        },
+        toggleComment(post) {
+            post.showComment = !post.showComment;
         }
     }
 };
@@ -74,6 +96,37 @@ export default {
 .scroll-container {
     height: 80vh;
     overflow-y: auto;
+}
+
+.post {
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+}
+
+.icons {
+    display: flex;
+    align-items: center;
+}
+
+.thumb-icon {
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.thumb-icon .checked {
+    background-color: blue;
+    color: white;
+    border-radius: 50%;
+    padding: 5px;
+}
+
+.comment-icon {
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.comment-area {
+    margin-top: 10px;
 }
 
 .loading {

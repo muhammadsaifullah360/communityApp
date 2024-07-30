@@ -60,4 +60,8 @@ export default {
     border-radius: 50%;
     margin-right: 10px;
 }
+.top-creators{
+    max-height: 500px;
+    overflow-y: auto;
+}
 </style>
