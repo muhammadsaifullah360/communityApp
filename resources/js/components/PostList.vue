@@ -124,6 +124,9 @@ export default {
         },
         async fetchComments(post) {
             try {
+                const headers = {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                };
                 const response = await axios.get(`/api/posts/${post.id}/comments`);
                 post.comments = response.data;
             } catch (error) {
