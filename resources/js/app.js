@@ -14,11 +14,14 @@
 
 import { createApp } from 'vue';
 import App from './components/App.vue';
+import axios from 'axios';
 import '../css/style.css';
 
 import VueSweetalert2 from 'vue-sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 
+axios.defaults.withCredentials = true;
+axios.defaults.headers.common['Authorization'] = `Bearer ${localStorage.getItem('token')}`; // Adjust as needed
 // Create the Vue app instance
 const app = createApp(App);
 

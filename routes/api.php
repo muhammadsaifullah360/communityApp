@@ -26,11 +26,16 @@ Route::post('logout', [LoginController::class, 'logout'])->middleware('auth:sanc
 Route::get('top-creators', [UserController::class, 'getTopCreators']);
 
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::get('get/posts', [PostController::class, 'associatedPosts']);
 
+Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('posts', PostController::class);
     Route::apiResource('comments', CommentController::class);
     Route::get('users/{user}', [UserController::class, 'show']);
+    Route::post('/posts/{post}/like', [PostController::class, 'like']);
+    Route::post('/posts/{post}/unlike', [PostController::class, 'unlike']);
+    Route::post('/posts/{post}/comment', [PostController::class, 'storeComment']);
+    Route::get('/posts/{post}/comments', [PostController::class, 'getComments']);
 });
-Route::get('posts', [PostController::class, 'index']);
-Route::get('posts/{post}', [PostController::class, 'show']);
+// Route::get('posts', [PostController::class, 'index']);
+// Route::get('posts/{post}', [PostController::class, 'show']);

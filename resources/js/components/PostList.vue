@@ -1,11 +1,12 @@
 <template>
-    <div class="scroll-container" @scroll="handleScroll">
+    <div ref="scrollContainer" class="scroll-container" @scroll="handleScroll">
         <div v-for="post in posts" :key="post.id" class="post">
             <p><strong>{{ post.title }}</strong></p>
             <p>{{ post.content }}</p>
             <div class="icons">
                 <span class="thumb-icon" @click="toggleThumb(post)">
-                    <i :class="{'checked': post.checked}">👍</i>
+                    <i :class="{ 'checked': post.checked }">👍</i>
+                    <small>{{ post.likes_count }}</small>
                 </span>
                 <span class="comment-icon" @click="toggleComment(post)">
                     💬
@@ -13,14 +14,23 @@
                 <small>{{ formatDate(post.created_at) }}</small>
             </div>
             <div v-if="post.showComment" class="comment-area">
-                <textarea placeholder="Write a comment..."></textarea>
+                <textarea v-model="post.newComment" placeholder="Write a comment..."></textarea>
+                <button @click="submitComment(post)">Send</button>
+                <div v-if="post.commentSent" class="comment-success">Comment sent!</div>
+            </div>
+            <div v-if="post.comments && post.comments.length" class="comments-list">
+                <div v-for="comment in post.comments" :key="comment.id" class="comment">
+                    <strong>{{ comment.user.name }}:</strong> {{ comment.content }}
+                </div>
             </div>
         </div>
         <div v-if="loading" class="loading">Loading...</div>
+        <div v-if="finished && !loading" class="loading">No more posts to load.</div>
     </div>
 </template>
 
 <script>
+import { formatDistanceToNow, parseISO } from 'date-fns';
 import axios from 'axios';
 
 export default {
@@ -32,15 +42,29 @@ export default {
             finished: false
         };
     },
-    async created() {
+    async mounted() {
         await this.fetchPosts();
+        if (this.$refs.scrollContainer) {
+            this.$refs.scrollContainer.addEventListener('scroll', this.handleScroll);
+        }
+    },
+    beforeUnmount() {
+        if (this.$refs.scrollContainer) {
+            this.$refs.scrollContainer.removeEventListener('scroll', this.handleScroll);
+        }
     },
     methods: {
         handleScroll() {
-            const container = this.$el;
-            const bottom = container.scrollHeight === container.scrollTop + container.clientHeight;
-            if (bottom && !this.loading && !this.finished) {
-                this.fetchPosts();
+            const container = this.$refs.scrollContainer;
+            if (container) {
+                const scrollTop = container.scrollTop;
+                const clientHeight = container.clientHeight;
+                const scrollHeight = container.scrollHeight;
+                const nearBottom = scrollHeight - scrollTop <= clientHeight + 100; // buffer of 100px
+
+                if (nearBottom && !this.loading && !this.finished) {
+                    this.fetchPosts();
+                }
             }
         },
         async fetchPosts() {
@@ -48,15 +72,23 @@ export default {
 
             this.loading = true;
             try {
-                const response = await axios.get(`/api/posts?page=${this.page}`);
-                if (response.data.data.length === 0) {
+                const response = await axios.get(`/api/get/posts?page=${this.page}`);
+                const { data, current_page, last_page } = response.data;
+
+                if (!Array.isArray(data)) {
+                    throw new Error('Unexpected response format: not an array');
+                }
+
+                if (data.length === 0 || current_page >= last_page) {
                     this.finished = true;
                 } else {
-                    this.posts = [...this.posts, ...response.data.data];
-                    // Initialize the new posts with checked and showComment properties
+                    this.posts = [...this.posts, ...data];
                     this.posts.forEach(post => {
                         if (!post.hasOwnProperty('checked')) post.checked = false;
                         if (!post.hasOwnProperty('showComment')) post.showComment = false;
+                        if (!post.hasOwnProperty('newComment')) post.newComment = '';
+                        if (!post.hasOwnProperty('commentSent')) post.commentSent = false;
+                        if (!post.hasOwnProperty('comments')) post.comments = []; // Initialize comments if missing
                     });
                     this.page++;
                 }
@@ -66,27 +98,57 @@ export default {
                 this.loading = false;
             }
         },
-        async refreshPosts() {
-            this.posts = [];
-            this.page = 1;
-            this.finished = false;
-            await this.fetchPosts();
-        },
-        formatDate(dateString) {
-            const date = new Date(dateString);
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
+        async toggleThumb(post) {
+            try {
+                const headers = {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                };
 
-            return `${hours}:${minutes} ${day}-${month}-${year}`;
-        },
-        toggleThumb(post) {
-            post.checked = !post.checked;
+                if (post.checked) {
+                    await axios.post(`/api/posts/${post.id}/unlike`, {}, { headers });
+                    post.likes_count--;
+                } else {
+                    await axios.post(`/api/posts/${post.id}/like`, {}, { headers });
+                    post.likes_count++;
+                }
+                post.checked = !post.checked;
+            } catch (error) {
+                console.error('Error toggling thumb:', error);
+            }
         },
         toggleComment(post) {
             post.showComment = !post.showComment;
+            if (post.showComment && !post.comments.length) {
+                this.fetchComments(post);
+            }
+        },
+        async fetchComments(post) {
+            try {
+                const response = await axios.get(`/api/posts/${post.id}/comments`);
+                post.comments = response.data;
+            } catch (error) {
+                console.error('Error fetching comments:', error);
+            }
+        },
+        async submitComment(post) {
+            try {
+                await axios.post(`/api/posts/${post.id}/comment`, { content: post.newComment });
+                post.newComment = '';
+                post.commentSent = true;
+                await this.fetchComments(post); // Refresh comments
+            } catch (error) {
+                console.error('Error submitting comment:', error);
+            }
+        },
+        formatDate(dateString) {
+            const date = parseISO(dateString);
+            return formatDistanceToNow(date, { addSuffix: true });
+        },
+        refreshPosts() {
+            this.posts = [];
+            this.page = 1;
+            this.finished = false;
+            this.fetchPosts();
         }
     }
 };
@@ -111,6 +173,8 @@ export default {
 .thumb-icon {
     cursor: pointer;
     margin-right: 10px;
+    display: flex;
+    align-items: center;
 }
 
 .thumb-icon .checked {
@@ -132,5 +196,19 @@ export default {
 .loading {
     text-align: center;
     padding: 10px;
+}
+
+.comments-list {
+    margin-top: 10px;
+}
+
+.comment {
+    border-bottom: 1px solid #eee;
+    padding: 5px 0;
+}
+
+.comment-success {
+    color: green;
+    margin-top: 5px;
 }
 </style>

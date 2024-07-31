@@ -2,18 +2,19 @@
     <div>
         <header class="d-flex justify-content-between align-items-center py-3">
             <h1>CONVOHUB</h1>
-            <div class="gap">
-                <button v-if="!isAuthenticated" class="btn btn-secondary" data-toggle="modal"
+            <div>
+                <button v-if="!isAuthenticated" class="btn btn-secondary btnMargin" data-toggle="modal"
                     data-target="#signupModal">
                     Sign Up
                 </button>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#postModal">
+                <button class="btn btn-primary btnMargin" data-toggle="modal" data-target="#postModalcreate">
                     Create a Post
                 </button>
-                <button v-if="!isAuthenticated" class="btn btn-secondary" data-toggle="modal" data-target="#loginModal">
+                <button v-if="!isAuthenticated" class="btn btn-secondary btnMargin" data-toggle="modal"
+                    data-target="#loginModal">
                     Log In
                 </button>
-                <button v-if="isAuthenticated" class="btn btn-danger" @click="logout">
+                <button v-if="isAuthenticated" class="btn btn-danger btnMargin" @click="logout">
                     Log Out
                 </button>
             </div>
@@ -52,7 +53,6 @@
                 <div class="col-md-4">
                     <TopCreators />
                     <CreatedPost />
-
                 </div>
             </div>
         </div>
@@ -107,10 +107,13 @@ export default {
             this.isAuthenticated = true;
         },
         handleRegisterSuccess() {
-            // You might want to log in the user automatically or show a success message
         },
         refreshPosts() {
-            this.$refs.postList.refreshPosts();
+            if (this.$refs.postList && typeof this.$refs.postList.refreshPosts === 'function') {
+                this.$refs.postList.refreshPosts();
+            } else {
+                console.error('refreshPosts method is not available');
+            }
         }
     },
     mounted() {
@@ -123,5 +126,7 @@ export default {
 </script>
 
 <style>
-/* Add your styles here */
+.btnMargin {
+    margin-right: 3px;
+}
 </style>

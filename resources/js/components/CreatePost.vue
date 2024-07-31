@@ -1,5 +1,6 @@
 <template>
-    <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
+    <div class="modal fade" id="postModalcreate" tabindex="-1" role="dialog" aria-labelledby="postModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -12,11 +13,13 @@
                     <form @submit.prevent="createPost">
                         <div class="form-group">
                             <label for="title">Title</label>
-                            <input type="text" class="form-control" v-model="title" id="title" placeholder="Enter Title" required>
+                            <input type="text" class="form-control" v-model="title" id="title" placeholder="Enter Title"
+                                required>
                         </div>
                         <div class="form-group">
                             <label for="content">Content</label>
-                            <textarea class="form-control" v-model="content" id="content" placeholder="Enter Content" required></textarea>
+                            <textarea class="form-control" v-model="content" id="content" placeholder="Enter Content"
+                                required></textarea>
                         </div>
                         <div class="modal-footer d-flex justify-content-between align-items-center">
                             <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
@@ -67,7 +70,7 @@ export default {
             this.content = '';
         },
         closeModal() {
-            $('#postModal').modal('hide'); // Close the modal
+            $('#postModalcreate').modal('hide'); // Close the modal
             $('.modal-backdrop').remove(); // Remove the modal backdrop
         }
     }

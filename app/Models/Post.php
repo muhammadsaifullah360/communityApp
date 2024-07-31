@@ -12,7 +12,8 @@ class Post extends Model
     protected $fillable = [
         'title',
         'question',
-        'content',    ];
+        'content',
+    ];
 
     public function user()
     {
@@ -22,5 +23,14 @@ class Post extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function getLikesCountAttribute()
+    {
+        return $this->likes()->count();
     }
 }

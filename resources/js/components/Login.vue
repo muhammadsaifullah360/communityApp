@@ -48,7 +48,7 @@ export default {
                     password: this.password,
                 });
                 localStorage.setItem('token', response.data.access_token);
-                // Handle success (e.g., redirect or show a message)
+                // Emit an event to fetch posts in the parent component
                 this.$emit('login-success');
                 this.$swal('Success', 'You have successfully logged in', 'success');
                 $('#loginModal').modal('hide');
@@ -56,7 +56,8 @@ export default {
             } catch (error) {
                 this.$swal('Error', 'Invalid email or password', 'error');
             }
-        },
+        }
+
     },
 };
 </script>

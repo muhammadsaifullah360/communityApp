@@ -15,7 +15,7 @@
             <div class="tab-pane fade show active" id="alltime" role="tabpanel" aria-labelledby="alltime-tab">
                 <ul class="list-unstyled">
                     <li class="d-flex align-items-center" v-for="creator in creators.allTime" :key="creator.id">
-                        <img alt="avatar" class="creator-img">
+                        <img :src="`/images/image.jpg`" alt="avatar" class="creator-img">
                         {{ creator.name }} - {{ creator.posts_count }} posts
                     </li>
                 </ul>
@@ -47,13 +47,12 @@ export default {
             } catch (error) {
                 console.error('Error fetching creators:', error);
             }
-        }
+        },
     },
 };
 </script>
 
 <style>
-/* Add your styles here */
 .creator-img {
     width: 50px;
     height: 50px;
