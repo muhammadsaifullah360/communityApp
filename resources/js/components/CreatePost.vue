@@ -1,6 +1,5 @@
 <template>
-    <div class="modal fade" id="postModalcreate" tabindex="-1" role="dialog" aria-labelledby="postModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="postModalcreate" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -10,16 +9,14 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form @submit.prevent="createPost">
+                    <form @submit.prevent="handleCreatePost">
                         <div class="form-group">
                             <label for="title">Title</label>
-                            <input type="text" class="form-control" v-model="title" id="title" placeholder="Enter Title"
-                                required>
+                            <input type="text" class="form-control" v-model="title" id="title" placeholder="Enter Title" required>
                         </div>
                         <div class="form-group">
                             <label for="content">Content</label>
-                            <textarea class="form-control" v-model="content" id="content" placeholder="Enter Content"
-                                required></textarea>
+                            <textarea class="form-control" v-model="content" id="content" placeholder="Enter Content" required></textarea>
                         </div>
                         <div class="modal-footer d-flex justify-content-between align-items-center">
                             <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
@@ -33,8 +30,7 @@
 </template>
 
 <script>
-import axios from 'axios';
-// import $ from 'jquery'; // Make sure to import jQuery
+import { mapActions } from 'vuex';
 
 export default {
     data() {
@@ -44,23 +40,13 @@ export default {
         };
     },
     methods: {
-        async createPost() {
+        ...mapActions(['createPost', 'fetchPosts']), // Make sure fetchPosts is included
+        async handleCreatePost() {
             try {
-                const formData = new FormData();
-                formData.append('title', this.title);
-                formData.append('content', this.content);
-
-                const token = localStorage.getItem('token');
-                const response = await axios.post('/api/posts', formData, {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-
-                this.$emit('post-created', response.data);
+                await this.createPost({ title: this.title, content: this.content });
                 this.resetForm();
                 this.closeModal();
+                this.$emit('postCreated'); // Emit an event to notify parent or use a global event bus
             } catch (error) {
                 console.error('Error creating post:', error);
             }
@@ -76,7 +62,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-/* Add modal-specific styles here */
-</style>

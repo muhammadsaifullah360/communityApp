@@ -15,6 +15,7 @@
 import { createApp } from 'vue';
 import App from './components/App.vue';
 import axios from 'axios';
+import store from './store';
 import '../css/style.css';
 
 import VueSweetalert2 from 'vue-sweetalert2';
@@ -27,6 +28,8 @@ const app = createApp(App);
 
 // Use VueSweetalert2 plugin
 app.use(VueSweetalert2);
+app.use(store); // Use the Vuex store
+
 
 // Mount the app
 app.mount('#app');

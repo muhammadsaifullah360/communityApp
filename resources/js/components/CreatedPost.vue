@@ -1,16 +1,14 @@
 <template>
     <div class="top-creators mt-2">
         <h5 class="d-flex post_heading">My Posts</h5>
-
-        <div class="tab-content" id="">
-            <div class="tab-pane fade show active" id="week" role="tabpanel" aria-labelledby="week-tab">
+        <div class="tab-content">
+            <div class="tab-pane fade show active" id="week" role="tabpanel">
                 <ul class="list-unstyled">
-                    <li v-for="post in posts" :key="post.id"
-                        class="d-flex align-items-center justify-content-between stye_list">
+                    <li v-for="post in posts" :key="post.id" class="d-flex align-items-center justify-content-between stye_list">
                         <p class="title_heading">{{ post.title }}</p>
                         <div class="d-flex gap-5 flex-direction-column">
                             <button @click="openEditModal(post)" class="common_btn">Edit</button>
-                            <button @click="deletePost(post.id)" class="common_btn">Delete</button>
+                            <button @click="handleDeletePost(post.id)" class="common_btn">Delete</button>
                         </div>
                     </li>
                 </ul>
@@ -19,8 +17,7 @@
     </div>
 
     <!-- Modal for Editing Post -->
-    <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="postModal" tabindex="-1" role="dialog" aria-labelledby="postModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -33,13 +30,11 @@
                     <form @submit.prevent="updatePost">
                         <div class="form-group">
                             <label for="title">Title</label>
-                            <input type="text" class="form-control" v-model="title" id="title" placeholder="Enter Title"
-                                required>
+                            <input type="text" class="form-control" v-model="title" id="title" placeholder="Enter Title" required>
                         </div>
                         <div class="form-group">
                             <label for="content">Content</label>
-                            <textarea class="form-control" v-model="content" id="content" placeholder="Enter Content"
-                                required></textarea>
+                            <textarea class="form-control" v-model="content" id="content" placeholder="Enter Content" required></textarea>
                         </div>
                         <div class="modal-footer d-flex justify-content-between align-items-center">
                             <button type="button" class="btn btn-secondary" @click="closeModal">Close</button>
@@ -53,85 +48,53 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue';
-import axios from 'axios';
+import { mapState, mapActions } from 'vuex';
 
 export default {
-    setup() {
-        const posts = reactive([]);
-        const title = ref('');
-        const content = ref('');
-        const currentPostId = ref(null);
-
-        const fetchPosts = async () => {
-            try {
-                const response = await axios.get('/api/posts');
-                posts.push(...response.data);
-            } catch (error) {
-                console.error('Error fetching posts:', error);
-            }
+    data() {
+        return {
+            title: '',
+            content: '',
+            currentPostId: null,
         };
-
-        const openEditModal = (post) => {
-            title.value = post.title;
-            content.value = post.content;
-            currentPostId.value = post.id;
+    },
+    computed: {
+        ...mapState(['posts']),
+    },
+    methods: {
+        ...mapActions(['fetchPosts', 'deletePost', 'updatePost']),
+        openEditModal(post) {
+            this.title = post.title;
+            this.content = post.content;
+            this.currentPostId = post.id;
             $('#postModal').modal('show');
-        };
-
-        const updatePost = async () => {
+        },
+        async updatePost() {
             try {
-                await axios.put(`/api/posts/${currentPostId.value}`, {
-                    title: title.value,
-                    content: content.value
-                });
-
-                // Update the post in the local array
-                const postIndex = posts.findIndex(post => post.id === currentPostId.value);
-                if (postIndex !== -1) {
-                    posts[postIndex] = { id: currentPostId.value, title: title.value, content: content.value };
-                }
-
-                closeModal();
+                await this.$store.dispatch('updatePost', { id: this.currentPostId, title: this.title, content: this.content });
+                this.closeModal();
             } catch (error) {
                 console.error('Error updating post:', error);
             }
-        };
-
-        const deletePost = async (postId) => {
+        },
+        async handleDeletePost(postId) {
             try {
-                await axios.delete(`/api/posts/${postId}`);
-                const postIndex = posts.findIndex(post => post.id === postId);
-                if (postIndex !== -1) {
-                    posts.splice(postIndex, 1);
-                }
+                await this.deletePost(postId);
             } catch (error) {
-                console.log('Error deleting post:', error);
+                console.error('Error deleting post:', error);
             }
-        };
-
-        const closeModal = () => {
-            title.value = '';
-            content.value = '';
-            currentPostId.value = null;
+        },
+        closeModal() {
+            this.title = '';
+            this.content = '';
+            this.currentPostId = null;
             $('#postModal').modal('hide');
-            $('.modal-backdrop').remove(); // Remove modal backdrop
-        };
-
-        onMounted(() => {
-            fetchPosts();
-        });
-
-        return {
-            posts,
-            title,
-            content,
-            openEditModal,
-            updatePost,
-            deletePost,
-            closeModal
-        };
-    }
+            $('.modal-backdrop').remove();
+        },
+    },
+    mounted() {
+        this.fetchPosts();
+    },
 };
 </script>
 <style>

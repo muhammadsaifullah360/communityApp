@@ -135,10 +135,14 @@ export default {
         },
         async submitComment(post) {
             try {
-                await axios.post(`/api/posts/${post.id}/comment`, { content: post.newComment });
-                post.newComment = '';
+                 const headers = {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                };
+                await axios.post(`/api/posts/${post.id}/comment`, { content: post.newComment }, { headers });
                 post.commentSent = true;
-                await this.fetchComments(post); // Refresh comments
+                post.newComment = '';
+                this.fetchComments(post);
+
             } catch (error) {
                 console.error('Error submitting comment:', error);
             }

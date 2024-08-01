@@ -10,7 +10,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form @submit.prevent="login">
+                    <form @submit.prevent="handleLogin">
                         <div class="form-group">
                             <input type="email" class="form-control" v-model="email" placeholder="Enter your email"
                                 required>
@@ -31,7 +31,7 @@
 </template>
 
 <script>
-import axios from 'axios';
+import { mapActions } from 'vuex';
 
 export default {
     data() {
@@ -41,23 +41,18 @@ export default {
         };
     },
     methods: {
-        async login() {
+        ...mapActions(['login']),
+        async handleLogin() {
             try {
-                const response = await axios.post('/api/login', {
-                    email: this.email,
-                    password: this.password,
-                });
-                localStorage.setItem('token', response.data.access_token);
-                // Emit an event to fetch posts in the parent component
-                this.$emit('login-success');
+                await this.login({ email: this.email, password: this.password });
                 this.$swal('Success', 'You have successfully logged in', 'success');
                 $('#loginModal').modal('hide');
                 $('.modal-backdrop').remove();
+                this.$emit('login-success');
             } catch (error) {
                 this.$swal('Error', 'Invalid email or password', 'error');
             }
-        }
-
+        },
     },
 };
 </script>
